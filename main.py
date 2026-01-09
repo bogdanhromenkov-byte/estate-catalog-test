@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from models import db, Property
+from api import api
 import os
 
 app = Flask(__name__)
@@ -8,6 +9,21 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///estate.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
+app.register_blueprint(api)
+
+# Разрешить отображение в iframe (для Bitrix24)
+@app.after_request
+def add_header(response):
+    # Разрешить отображение в iframe
+    response.headers['X-Frame-Options'] = 'ALLOWALL'
+    # Или можно указать конкретный домен Bitrix:
+    # response.headers['Content-Security-Policy'] = "frame-ancestors 'self' https://ваш-домен.bitrix24.ru"
+    
+    # CORS заголовки
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    return response
 
 @app.route('/')
 def index():

@@ -2,11 +2,19 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from models import db, Property
 from api import api
 import os
+from dotenv import load_dotenv
+
+# Загрузка переменных окружения
+load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key-here'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///estate.db'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', os.urandom(24).hex())
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///estate.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Получаем разрешенные домены для CORS из переменных окружения
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '*').split(',')
+BITRIX24_DOMAIN = os.getenv('BITRIX24_DOMAIN', '*')
 
 db.init_app(app)
 app.register_blueprint(api)
@@ -16,12 +24,18 @@ app.register_blueprint(api)
 def add_header(response):
     # Полностью убираем X-Frame-Options чтобы разрешить iframe
     response.headers.pop('X-Frame-Options', None)
-    
-    # Разрешаем любые источники для frame
-    response.headers['Content-Security-Policy'] = "frame-ancestors *"
-    
-    # CORS заголовки для API
-    response.headers['Access-Control-Allow-Origin'] = '*'
+
+    # Разрешаем встраивание только с Bitrix24
+    if BITRIX24_DOMAIN != '*':
+        response.headers['Content-Security-Policy'] = f"frame-ancestors {BITRIX24_DOMAIN}"
+    else:
+        # Для разработки разрешаем всё
+        response.headers['Content-Security-Policy'] = "frame-ancestors *"
+
+    # CORS заголовки для API - разрешаем только указанные домены
+    origin = request.headers.get('Origin')
+    if ALLOWED_ORIGINS[0] == '*' or origin in ALLOWED_ORIGINS:
+        response.headers['Access-Control-Allow-Origin'] = origin if origin else '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     return response

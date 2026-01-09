@@ -95,10 +95,22 @@ su - $APP_NAME -c 'cd $APP_DIR && python3 -m venv venv'
 # Установить зависимости
 su - $APP_NAME -c 'cd $APP_DIR && source venv/bin/activate && pip install -q -r requirements.txt'
 
+# Создать .env файл с уникальным SECRET_KEY
+SECRET_KEY=\$(python3 -c 'import os; print(os.urandom(24).hex())')
+cat > $APP_DIR/.env << ENV_EOF
+SECRET_KEY=\$SECRET_KEY
+DATABASE_URL=sqlite:///estate.db
+FLASK_ENV=production
+BITRIX24_DOMAIN=*
+ALLOWED_ORIGINS=*
+ENV_EOF
+
+chown $APP_NAME:$APP_NAME $APP_DIR/.env
+
 # Инициализировать базу данных
 su - $APP_NAME -c 'cd $APP_DIR && source venv/bin/activate && timeout 5 python3 main.py || true'
 
-echo '✓ Проект установлен'
+echo '✓ Проект установлен и .env создан'
 "
 echo ""
 

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}{{ property.title }} - EstateHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="breadcrumb">
+        <a href="/">← Back to catalog</a>
+    </div>
+    
+    <div class="property-detail">
+        <div class="detail-image">
+            <img src="{{ property.image_url or 'https://via.placeholder.com/800x600' }}" alt="{{ property.title }}">
+        </div>
+        
+        <div class="detail-content">
+            <div class="detail-header">
+                <div>
+                    <span class="badge">{{ property.property_type }}</span>
+                    <h1>{{ property.title }}</h1>
+                    <p class="detail-address">📍 {{ property.address }}</p>
+                </div>
+                <div class="detail-price">
+                    {{ property.format_price() }}
+                </div>
+            </div>
+            
+            <div class="detail-specs">
+                {% if property.rooms %}
+                <div class="spec-item">
+                    <div class="spec-icon">🛏️</div>
+                    <div>
+                        <div class="spec-label">Rooms</div>
+                        <div class="spec-value">{{ property.rooms }}</div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if property.area %}
+                <div class="spec-item">
+                    <div class="spec-icon">📐</div>
+                    <div>
+                        <div class="spec-label">Area</div>
+                        <div class="spec-value">{{ property.area }} sqm</div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if property.floor %}
+                <div class="spec-item">
+                    <div class="spec-icon">🏢</div>
+                    <div>
+                        <div class="spec-label">Floor</div>
+                        <div class="spec-value">{{ property.floor }} of {{ property.total_floors }}</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="detail-section">
+                <h2>Description</h2>
+                <p>{{ property.description }}</p>
+            </div>
+            
+            <div class="detail-actions">
+                <button class="btn-primary btn-large">📞 Call</button>
+                <button class="btn-secondary btn-large">💬 Message</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

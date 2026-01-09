@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Real Estate Catalog - EstateHub{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <div class="container">
+        <h1>Find Your Perfect Home</h1>
+        <p>More than {{ properties|length }} properties available</p>
+        
+        <form action="/search" method="get" class="search-form">
+            <input type="text" name="q" placeholder="Search by address or description..." value="{{ search_query or '' }}">
+            <select name="type">
+                <option value="">All types</option>
+                <option value="Apartment">Apartment</option>
+                <option value="House">House</option>
+                <option value="Commercial">Commercial</option>
+            </select>
+            <button type="submit" class="btn-primary">🔍 Search</button>
+        </form>
+    </div>
+</div>
+
+<div class="container">
+    <div class="properties-grid">
+        {% if properties %}
+            {% for property in properties %}
+            <div class="property-card">
+                <div class="property-image" style="background-image: url('{{ property.image_url or 'https://via.placeholder.com/400x300' }}');">
+                    <span class="property-type">{{ property.property_type }}</span>
+                </div>
+                <div class="property-info">
+                    <h3>{{ property.title }}</h3>
+                    <p class="property-address">📍 {{ property.address }}</p>
+                    <p class="property-description">{{ property.description[:100] }}...</p>
+                    
+                    <div class="property-details">
+                        {% if property.rooms %}
+                        <span>🛏️ {{ property.rooms }} rooms</span>
+                        {% endif %}
+                        {% if property.area %}
+                        <span>📐 {{ property.area }} sqm</span>
+                        {% endif %}
+                        {% if property.floor %}
+                        <span>🏢 {{ property.floor }}/{{ property.total_floors }} floor</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="property-footer">
+                        <div class="property-price">{{ property.format_price() }}</div>
+                        <a href="/property/{{ property.id }}" class="btn-secondary">Details →</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <h2>No properties found</h2>
+                <p>Try changing your search parameters</p>
+                <a href="/" class="btn-primary">Reset filters</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

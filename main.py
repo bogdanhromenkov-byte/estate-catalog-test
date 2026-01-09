@@ -14,12 +14,13 @@ app.register_blueprint(api)
 # Разрешить отображение в iframe (для Bitrix24)
 @app.after_request
 def add_header(response):
-    # Разрешить отображение в iframe
-    response.headers['X-Frame-Options'] = 'ALLOWALL'
-    # Или можно указать конкретный домен Bitrix:
-    # response.headers['Content-Security-Policy'] = "frame-ancestors 'self' https://ваш-домен.bitrix24.ru"
+    # Полностью убираем X-Frame-Options чтобы разрешить iframe
+    response.headers.pop('X-Frame-Options', None)
     
-    # CORS заголовки
+    # Разрешаем любые источники для frame
+    response.headers['Content-Security-Policy'] = "frame-ancestors *"
+    
+    # CORS заголовки для API
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
